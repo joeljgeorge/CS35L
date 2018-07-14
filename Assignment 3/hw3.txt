@@ -1,0 +1,50 @@
+Joel George 004786402
+
+Q1. Technically, it wasn't necessary to remove the line
+case_long_iso_time_style. The only reason this was there was because in the
+original version of ls.c, there was a goto call to this line. However, the patch
+removed that goto call. While the goto call was removed for functional reasons,
+there was no real need, outside of keeping the code clean and clear, for that
+line to be removed. The line still could've existed there; it simply wouldn't be
+called by anything else in that file.
+ 
+Q2. If my company adopts this patch, we first have to watch out for any other of
+our applications that parses ls output, because if it is expecting the ISO
+format, which apparently was the usual format for 4 years (as of Padraig Brady
+writing in 2009), it might crash, produce undefined output when it receives the
+traditional UNIX formatted dates, or result in other minor bugs. Also, for
+languages where date format translations are not available, ISO will be output,
+even though there may be month abbreviations that can be used. (i.e. Brady says
+there is no translations from en_PH to tl_PH, even though Tagalog month
+abbreviations do exist. 'LANG=tl_PH locale abmon' has the following month
+abbreviations Ene;Peb;Mar;Abr;May;Hun;Hul;Ago;Sep;Okt;Nob;Dis). This patch
+assumes that date format is related to the language rather than the country, so
+in the example given, even though the Philippines and America have the same date
+formats, this patch will output ISO for the Philippines instead of the
+traditional UNIX format.
+
+Q3. I first created an empty file to invoke the script on (touch empty.txt). I
+then invoked the Python file on it; at first, I set the number of lines to
+randomly select to 3 (python randline.py -n 3 empty.txt), and I got an error
+that the list index is out of range. I tried this again, except this time I set
+the number of lines to be randomly selected to 0 (python randline.py -n 0
+empty.txt). With this input, I received no error.
+
+Q4. When I tried running the program with python3 (first had to run alias
+python3=/usr/local/cs/bin/python3), the program crashed, outputting a syntax
+error. The line that triggered the syntax error was:
+
+except IOError as (errno, strerror)
+
+This is not supported in Python 3. According to PEP 3110 -- Catching Exceptions
+in Python 3000, which can be found at https://www.python.org/dev/peps/pep-3110/,
+the following syntax is invalid:
+
+except os.error, (errno, errstr)
+
+And since in this case, ',' and 'as' are interchangeable, it is clear that the
+line 'except IOError as (errno, strerror') is not valid syntax.
+
+A fix can be:
+
+except IOError(errno, strerror).

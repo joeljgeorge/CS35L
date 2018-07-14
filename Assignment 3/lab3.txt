@@ -1,0 +1,207 @@
+Joel George
+004786402
+
+Lab 3:
+
+
+
+1. I created a temporary folder called coreutilsInstall, and then I used 'wget
+ftp://ftp.gnu.org/gnu/coreutils/coreutils-7.6.tar.gz' to download the zip file
+into that directory. I used tar -xzvf coreutils-7.6.tar.gz to unzip the
+coreutils zip file. I used those tags because -x tells the command to extract
+from the zip file, -z tells the command what type of zip file this is, -v tells
+the command to list every file processed so I can see what has been extracted,
+and -f so that everything is stored into a folder with the same name as the zip
+file.
+
+2. Next, I set my locale in that directory to the faulty one: 'en_US.UTF-8'
+using the given 'export LC_ALL='en_US.UTF-8'' command. Then, I ran readlink -f
+coreutilsInstall to get the absolute path of the temporary folder I was in.  I
+had trouble with this initially, because I ran readlink while I was in the
+coreutils-7.6 director, so the absolute path that was output was for that
+folder, instead of the parent directory. I wanted to install it in the parent
+directory, so I navigated to the '~' directory and then ran readlink. It worked
+that time. After reading the INSTALL file in the subdirectory coreutils-7.6 of
+coreutilsInstall, I ran ./configure
+--prefix=/w/home.14/ma/ugrad/george/coreutilsInstall, so that coreutils would be
+installed in the coreutilsInstall directory.
+
+Then, I ran make and make install, so the buggy ls would be installed in the
+parent directory.
+
+3. When I ran ./bin/-ls l, I saw the error. Instead of outputting:
+
+drwxr-xr-x 2 george maugrad 8192 Oct 24 13:55 bin drwxr-xr-x 15 george maugrad
+8192 Oct 24 13:54 coreutils-7.6 -rw-r--r-- 1 george maugrad 10014650 Oct 24
+13:06 coreutils-7.6.tar.gz drwxr-xr-x 3 george maugrad 4096 Oct 24 13:55 lib
+drwxr-xr-x 5 george maugrad 4096 Oct 24 13:55 share
+
+The output was:
+
+drwxr-xr-x 2 george maugrad 8192 2017-10-24 13:55 bin drwxr-xr-x 15 george
+maugrad 8192 2017-10-24 13:54 coreutils-7.6 -rw-r--r-- 1 george maugrad 10014650
+2017-10-24 13:06 coreutils-7.6.tar.gz drwxr-xr-x 3 george maugrad 4096
+2017-10-24 13:55 lib drwxr-xr-x 5 george maugrad 4096 2017-10-24 13:55 share
+
+The dates were in the wrong format.
+
+4. TODO: what does each command do?  I then went to the website which had the
+patch, copied the patch into a file called patch_file, and then ran the command
+patch -p1 < patch_file. I set pnum to p1 because each file name had either a
+leading a/ or b/, and since a and b aren't directories here, I removed
+them. They were unnecessary too, because all of the referenced files were
+contained within the working directory.
+
+When I first ran the command, I got an error:
+
+**** malformed patch at line 10: outline -*-
+
+Because emacs performs auto-space arrangement, it may have corrupted my patch
+file, so I deleted that file and created a new one in vim. I then ran the patch
+command again, and when the command asked me:
+
+Reversed (or previously applied) patch detected!  Assume -R? [n]
+
+I input y.
+
+The patch ran smoothly after:
+
+patching file NEWS Hunk #1 succeeded at 397 with fuzz 2 (offset 365 lines).
+patching file src/ls.c Reversed (or previously applied) patch detected!  Assume
+-R? [n] y Hunk #1 succeeded at 2013 (offset -1 lines).  Hunk #2 succeeded at
+2029 (offset -1 lines).
+
+
+5. Then, in the coreutils-7.6 directory, I ran make:
+
+make all-recursive make[1]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6' Making all in lib
+make[2]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/lib' make
+all-recursive make[3]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/lib' make[4]:
+Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/lib' make[4]: Leaving
+directory `/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/lib'
+make[3]: Leaving directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/lib' make[2]: Leaving
+directory `/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/lib' Making
+all in src make[2]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/src' make all-am
+make[3]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/src' CC ls.o CCLD dir
+CCLD vdir CCLD ls make[3]: Leaving directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/src' make[2]: Leaving
+directory `/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/src' Making
+all in doc make[2]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/doc' make[2]: Nothing
+to be done for `all'.  make[2]: Leaving directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/doc' Making all in
+man make[2]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/man' GEN dir.1 GEN
+vdir.1 GEN ls.1 make[2]: Leaving directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/man' Making all in po
+make[2]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/po' make[2]: Nothing
+to be done for `all'.  make[2]: Leaving directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/po' Making all in
+tests make[2]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/tests' make[2]:
+Nothing to be done for `all'.  make[2]: Leaving directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/tests' Making all in
+gnulib-tests make[2]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/gnulib-tests' make
+all-recursive make[3]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/gnulib-tests'
+make[4]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/gnulib-tests'
+make[4]: Nothing to be done for `all-am'.  make[4]: Leaving directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/gnulib-tests'
+make[3]: Leaving directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/gnulib-tests'
+make[2]: Leaving directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6/gnulib-tests'
+make[2]: Entering directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6' make[2]: Nothing to
+be done for `all-am'.  make[2]: Leaving directory
+`/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6' make[1]: Leaving
+directory `/w/home.14/ma/ugrad/george/coreutilsInstall/coreutils-7.6'
+
+The command make-all essentially initiates the recompilation of all the files
+affected by the edit in ls.c. The purpose of the make command is to greatly
+optimize recompilation of big projects, by focussing on recompiling only the
+files that were impacted by the modifications made to the project files. In this
+case, one of the most important make commands was "Making all in src", because
+the src files (in particular ls.c) need to be recompiled, as they were directly
+modified by me. More specifically, the command make all-am was ran in that
+directory, and it directly recompiled ls and the affected files. Similarly, the
+command executed while "Making all in man" was important too. The rest of the
+output is non-essential; it traces the path of the program, but not the commands
+executed in those areas are not as important as those executed in the src
+directory and man directory.
+
+6. I then navigated to my home directory and ran the command for the buggy ls,
+just to make sure it hadn't been overwritten:
+
+./bin/ls -l
+
+Output:
+
+drwxr-xr-x 2 george maugrad 8192 2017-10-24 14:39 bin drwxr-xr-x 13 george
+maugrad 8192 2017-10-24 16:09 coreutils-7.6 -rw-r--r-- 1 george maugrad 10014650
+2017-10-24 15:46 coreutils-7.6.tar.gz drwxr-xr-x 3 george maugrad 4096
+2017-10-24 16:08 lib drwxr-xr-x 5 george maugrad 4096 2017-10-24 13:55 share
+
+I then ran this command, to check the modified version of ls:
+
+./coreutils-7.6/src/ls -l
+
+Output:
+
+drwxr-xr-x 2 george maugrad 8192 Oct 24 14:39 bin drwxr-xr-x 13 george maugrad
+8192 Oct 24 16:09 coreutils-7.6 -rw-r--r-- 1 george maugrad 10014650 Oct 24
+15:46 coreutils-7.6.tar.gz drwxr-xr-x 3 george maugrad 4096 Oct 24 16:08 lib
+drwxr-xr-x 5 george maugrad 4096 Oct 24 13:55 share
+
+The dates have been corrected.
+
+I then created a file that was at least one year old (it is technically 37 years
+old); I used the following command to create a file whose modification/creation
+timestamp is January 3, 1980:
+
+touch -t 8001031305 super_old_file
+
+I also created a recent file by the command: touch recent_file
+
+For the buggy ls, this was the output: ./bin/ls -l (I didn't include the other
+entries): -rw-r--r-- 1 george maugrad 0 2017-10-24 16:36 recent_file -rw-r--r--
+1 george maugrad 0 1980-01-03 13:05 super_old_file
+
+This is the output for the functioning ls command: ./coreutils-7.6/src/ls -l (I
+didn't include the other entries): -rw-r--r-- 1 george maugrad 0 Oct 24 16:36
+recent_file -rw-r--r-- 1 george maugrad 0 Jan 3 1980 super_old_file
+
+Q1. Technically, it wasn't necessary to remove the line
+case_long_iso_time_style. The only reason this was there was because in the
+original version of ls.c, there was a goto call to this line. However, the patch
+removed that goto call. While the goto call was removed for functional reasons,
+there was no real need, outside of keeping the code clean and clear, for that
+line to be removed. The line still could've existed there; it simply wouldn't be
+called by anything else in that file.
+ 
+Q2. If my company adopts this patch, we first have to watch out for any other of
+our applications that parses ls output, because if it is expecting the ISO
+format, which apparently was the usual format for 4 years (as of Padraig Brady
+writing in 2009), it might crash, produce undefined output when it receives the
+traditional UNIX formatted dates, or result in other minor bugs. Also, for
+languages where date format translations are not available, ISO will be output,
+even though there may be month abbreviations that can be used. (i.e. Brady says
+there is no translations from en_PH to tl_PH, even though Tagalog month
+abbreviations do exist. 'LANG=tl_PH locale abmon' has the following month
+abbreviations Ene;Peb;Mar;Abr;May;Hun;Hul;Ago;Sep;Okt;Nob;Dis). This patch
+assumes that date format is related to the language rather than the country, so
+in the example given, even though the Philippines and America have the same date
+formats, this patch will output ISO for the Philippines instead of the
+traditional UNIX format.
+
+
