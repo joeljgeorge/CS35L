@@ -1,0 +1,152 @@
+﻿Joel George
+004786402
+
+As before, I unzipped the zip folder using tar -xvzf coreutils-with-bug.tar.gz,
+and then created a temporary directory called temp_assignment4. To get the
+hardlink to this directory, I ran readlink -f temp_assignment4, and then
+inserted that into the prefix argument of config. The config command looked like
+this: ./config --prefix=/w/home.14/ma/ugrad/george/temp_assignment4. The
+configuration ran fine, but when I tried to build the file, it didn't work. I
+got this error:
+
+if gcc -DHAVE_CONFIG_H
+-DLIBDIR=\"/w/home.14/ma/ugrad/george/temp_assignment4/lib\" -I. -I. -I..
+-I.. -I.   -g -O2 -MT utimecmp.o -MD -MP -MF ".deps/utimecmp.Tpo" -c -o
+utimecmp.o utimecmp.c; \
+then mv -f ".deps/utimecmp.Tpo" ".deps/utimecmp.Po"; else rm -f
+".deps/utimecmp.Tpo"; exit 1; fi
+In file included from utimecmp.c:41:0:
+utimens.h:2:5: error: conflicting types for 'futimens'
+ int futimens (int, char const *, struct timespec const [2]);
+     ^
+In file included from utimecmp.h:25:0,
+                 from utimecmp.c:25:
+/usr/include/sys/stat.h:373:12: note: previous declaration of 'futimens' was
+here
+ extern int futimens (int __fd, const struct timespec __times[2]) __THROW;
+            ^
+
+The problem here is that there are two functions that have the same name, but
+they have conflicting argument types. futimens in utimens.h has three
+parameters:
+
+int futimens (int, char const *, struct timespec const [2]);
+
+but the futimens declaration in stat.h has 2 arguments:
+
+extern int futimens (int __fd, const struct timespec __times[2]) __THROW;
+
+Since these function prototypes conflict,
+an error is thrown and the build is halted. To fix this, the patch essentially
+renames the futimens function in the utimens.c, utimens.h, and tee.c to
+coreutils_futimen, so that this function name conflict between futimens in those
+files and futimens in stat.h is resolved.
+
+To add the renaming patch, I created a file called patch file and ran:
+
+patch -p0 < patch_file
+
+I ran p0 because there were no extraneous leading slashes to strip.
+
+After running the patch, I ran make, and then make install, and the buggy
+version of coreutils was installed in my temporary directory.
+
+To replicate the bug, I ran the command provided by the professor in my
+temporary directory:
+
+ touch -d '1918-11-11 11:00 GMT' wwi-armistice
+ touch now
+ sleep 1
+ touch now1
+ TZ=UTC0 ls -lt --full-time wwi-armistice now now1
+
+The output from the last command was:
+-rw-r--r-- 1 george maugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 george maugrad 0 2017-11-04 04:18:19.975969000 +0000 now1
+-rw-r--r-- 1 george maugrad 0 2017-11-04 04:18:08.644932000 +0000 now
+
+This says that the wwi-armistice is the most recent file, as it sits at the top
+of the ordering, while we know that this should not be the case.
+
+To run with gdb, I ran gdb ./coreutils-with-bug/ls in my
+working directory:
+gdb ./coreutils-with-bug/ls
+run –lt wwi-armistice now now1
+
+This didn't give me much, so I used info functions to show me the relevant
+functions that were in ls.c There were a lot, so I looked through the source
+code for some clues (source code was in original zip file that was
+downloaded). In there, I found that time m_time represents the default time
+setting that is used when no time argument is given to ls. Thus, I set a break
+at compare m_time, and then ran:
+
+run -lt
+
+I didn't use any specific files, because I wanted to see how ls -lt works in the
+first place. After gdb paused at my break point, I used list and I saw that this was the source code of
+compare_m_time:
+cmp_mtime (struct fileinfo const *a, struct fileinfo const *b,
+           int (*cmp) (char const *, char const *))
+ {
+      int diff = timespec_cmp (get_stat_mtime (&b->stat),
+                               get_stat_mtime (&a->stat));
+      return diff ? diff : cmp (a->name, b->name);
+  }
+
+Thus, I set another break at timespec_cmp, to see what that function was
+doing. I ran c to continue until I hit that breakpoint. Once there, I used list
+to see the source code again:
+
+ /* Return negative, zero, positive if A < B, A == B, A > B, respectively.
+    Assume the nanosecond components are in range, or close to it.  */
+      static inline int
+       timespec_cmp (struct timespec a, struct timespec b)
+      {
+        int diff = a.tv_sec - b.tv_sec;
+        return diff ? diff : a.tv_nsec - b.tv_nsec;
+      }
+We can see the potential error here. Since this is integer subtraction, if the
+difference between the timestamps is large enough, the value may be so negative
+that it overflows into a positive one. Thus, the file would be sorted as the
+most recent of the batch, while in reality it is the oldest.
+
+To fix this, simply remove the subtraction comparison and replace it with a
+boolean comparison:
+
+if(a.tv_sec > b.tv_sec)
+int diff = 1;
+else if(a.tv_sec < b.tv_sec)
+int diff = -1;
+else
+int diff = 0;
+return diff;
+
+To create the diff file, I first created a copy of timespec.h using cp
+lib/timespec.h timespec.h. Then I made my changes and ran diff -u lib/timespec.h
+timespec.h. To add my Changelog, I used C x 4 a and added a description of my
+changes, then copied this into my diff patch (only after applying the patch).
+After applying this patch, the ls command worked as expected, with the oldest
+file being at the bottom of the list.
+
+Creating the files wwi-armistice, now, and now1 on my SEASNet desktop output the following:
+-rw-r--r-- 1 george maugrad 0 2054-12-17 17:28:16.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 george maugrad 0 2017-11-04 06:08:06.183243000 +0000 now1
+-rw-r--r-- 1 george maugrad 0 2017-11-04 06:07:54.969215000 +0000 now
+
+The year is way off. The reason for this might be because the timestamp may be
+too negative, because it comes before 1970. This website
+(http://www.thegeekstuff.com/2012/11/linux-touch-command/) states that the touch
+command interprets years from 1970 to 2038, and since we are trying to set the
+year to 1918, this returns a value too negative, and thus outputs a faulty year.
+I tried to create a file with a year greater than 2038, and that worked, so the
+article wasn't correct in that regard, but it was correct with the 1970 lower
+limit, because when I tried to create the following file, I got another faulty
+year:
+
+file:
+ touch -d '1969-12-31 23:59 GMT' wwi-armistice
+
+ls output:
+-rw-r--r-- 1 george maugrad 0 2106-02-07 06:27:16.000000000 +0000 wwi-armistice
+
+
