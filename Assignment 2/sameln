@@ -1,0 +1,53 @@
+#!/bin/sh
+path="$1"
+IFS=$'\n'
+cd $path
+files="$(ls -a)"
+declare -a ARRAY
+count=0
+for FILE in $files
+do
+    ARRAY[$count]=$FILE
+    count=$count+1
+done
+
+for i in "${ARRAY[@]}"
+do
+    if [ -r $i ]
+    then
+	if [ -f $i -a ! -h $i ]  
+	then
+            for j in "${ARRAY[@]}"
+            do
+		if [ -r $j ]
+		then
+		    if [ "$i" = "$j" ]
+		    then
+			:
+		    elif [ -f $j -a ! -h $j ] 
+		    then
+			comparison=`cmp -- $i $j`
+			result=`echo $?`
+			if [ $result = 0  ]
+			then
+			    if [ "$i" \< "$j" ]
+			    then
+				`rm -- $j`
+				`ln -- $i $j`
+			    else
+				`rm -- $i`
+				`ln -- $j $i`
+			    fi
+			fi
+		    fi
+		else
+		    echo "Cannot read file $j"
+		fi
+            done
+	fi
+   else
+      echo "Cannot read file $i"
+   fi
+done
+
+

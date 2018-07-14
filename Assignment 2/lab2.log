@@ -1,0 +1,186 @@
+Student:Joel George TA: Isha
+
+The locale command originally outputted LC_CTYPE = "en_US.UTF-8", so I had to
+use the export LC_ALL='C' command to fix this.
+
+The words file looked like it was already sorted, but just in case, I ran the
+following command to create a new words file in my working directory:
+
+sort words -d > ~/CS35L/assignment2/words
+
+To create an HTML page that contains the HTML of Assignment 2's web page, I ran:
+
+curl http://web.cs.ucla.edu/classes/fall17/cs35L/assign/assign2.html >
+web_page.html
+
+
+Exploring the commands:
+
+tr -c 'A-Za-z' '[\n*]'
+
+I saved the output of the first command into a text file named output1.txt (tr
+-c 'A-Za-z' '[\n*]' < web_page.html> output1.txt) and started scrolling through
+it. The first thing I noticed was that each word had its own line - there was no
+single line that had two words on it. Secondly, there were no non-alphabetic
+characters. The command seems to replace all non-alphabetic characters with a
+newline.
+
+tr -cs 'A-Za-z' '[\n*]'
+
+Again, I saved the output of this command into a text file named output2.txt and
+scrolled through it. I noticed that the command's output only differs in the
+fact that it doesn't replace the non-alphabetical characters with new lines. The
+output does have a newline in the first line though. After scrolling through the
+man page, I saw that -s squeezes multiple occurrences of the first set into a
+single occurrence of that character. Since -c and [\n*] mean that we're going to
+be replacing all non-alphabetic characters with newlines, that explains why
+there is only one new line in the file. All the occurrences of non-alphabetic
+characters are replaced by one character at the beginning of the file, and that
+character is replaced by a newline.
+
+tr -cs 'A-Za-z' '[\n*]' | sort
+
+The only difference between this command and the previous one is that it sorts
+every word alphabetically. Now, words don't appear in the order that they do in
+the HTML file. They appear in alphabetical order.
+
+tr -cs 'A-Za-z' '[\n*]' | sort -u
+
+The only difference between this and the previous command is that now repeated
+occurrences of a word are not represented - each word only shows up once in the
+alphabetically organized list.
+
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm - words
+
+The output is split into three columns: the first column is words unique to the
+file web_page.html, the second column is words unique to the file words, and the
+third column is words shared across the files. The columns are sorted
+alphabetically.
+
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -23 - words
+
+This command outputs a file that simply consists of column 1 from the previous
+output; columns 2 and 3 are suppressed by the specifier -23.
+
+Creating hwords:
+
+I knew that we had to use the sed command, so after a bit of trial and error, I
+found that this command worked in printing all of the relevant entries that I
+needed (and then a few extras too):
+
+sed -n '/<td>/p'
+
+That's the first command in buildwords; I also had to edit the permissions in
+buildwords with the following command, to let me run the program:
+
+chmod u+x buildwords
+
+The first sed command's output had a special characteristic - all the Hawaiian
+words were on even number lines. Thus, I used this sed command to isolate the
+all the lines with Hawaiian words (and some blank lines too):
+
+sed -n '2~2p'
+
+To get rid of the HTML tags, I used the following command:
+
+sed 's/<[^>]*>//g'
+
+This removes everything including and between the characters < and >, and the g
+makes this replacement global.
+
+To remove the leading spaces, I used:
+
+sed 's/^ * //g'
+
+To separate entries that have multiple words separated by a comma, I first
+replaced all the spaces with newlines:
+
+sed 's/ /\n/g'
+
+To replace all okinas with apostrophes:
+
+sed "s/`/'/g"
+
+To remove all commas:
+
+sed "s/,//g"
+
+To remove all entries with non-Hawaiian characters (Id makes the deletion
+case-insensitive, so words like Pule wouldn't get deleted):
+
+sed "/[^pk\'mnwlhaeiou]/Id"
+
+To remove the lines that were left when words were removed:
+
+sed "/^$/d" (I had a bit of trouble with these lines - I didn't realize they
+were completely empty. I thought they had some kind of newline character on
+it. Once I realized that these lines are completely empty, the solution was
+simple.)
+
+To make all entries lower-case:
+
+tr '[:upper:]' '[:lower:]'
+
+To sort the words AND remove duplicates:
+
+sort -u
+
+My buildwords now looks like this:
+
+sed -n '/<td>/p' | sed -n '2~2p' | sed 's/<[^>]*>//g' | sed 's/^ * //g' | sed
+'s/ /\n/g' | sed "s/\`/\'/g" | sed 's/,//g'| sed "/[^pk\'mnwlhaeiou]/Id" | sed
+"/^$/d" | tr '[:upper:]' '[:lower:]' | sort -u
+
+Testing spellchecker against web page:
+
+Hawaiian -
+
+tr -cs 'A-Za-z' '[\n*]' < web_page.html| tr '[:upper:]' '[:lower:]' | sort -u
+|comm -23 - hwords
+
+I got 405 misspelled words with this. I just highlighted the text, pasted it
+into a word doc, and ran a quick check on line count.
+
+English -
+
+tr -cs 'A-Za-z' '[\n*]' < web_page.html| sort -u | comm -23 - words
+
+Here, we don't need tr '[:upper:]' '[:lower:]'; the English dictionary is not
+just lower case. Thus, I found 108 misspelled words.
+
+If I was to convert the file to lower case before checking it against the
+dictionary, this is what I'd get:
+
+tr -cs 'A-Za-z' '[\n*]' < web_page.html| tr '[:upper:]' '[:lower:]' | sort -u |
+comm -23 - words
+
+With this command, I get 38 misspelled words.
+
+Now, when comparing the misspelled words between the English and Hawaiian
+spellcheckers, I'm going to compare the lowercase outputs, because some words
+will be misspelled in the case insensitive one simply on the basis of case; the
+Hawaiian dictionary may contain it, but the case does not allow it to
+qualify. To make the comparison more relevant, we'll be looking at the lowercase
+outputs.
+
+One word that is mispelled in English that is not in the Hawaiian spellchecker
+is wiki, lau, and halau. I found an easy way to find these:
+
+cat lower_case_English_output.txt | comm -12 - hwords
+
+This simply compares the misspelled words output by the English spellchecker
+into the file lower_case_English_output.txt against the Hawaiian dictionary. The
+output of this command are the words that are comman to both. In other words,
+this command outputs the words that are misspelled according to the English
+spellchecker, but are included in the Hawaiian dictionary.
+
+Running a similar command, it's obvious that there are many more mispelled words
+(according to the Hawaiian spellchecker) that are actually included in the
+English dictionary - it makes sense too. The Hawaiian spellcheck is trying to
+spellcheck words in another language; since the languages are differenct, basic
+English words like "tables" or "sure" will be registered as mistakes, while
+those words are included in the English dictionary. This is the command I ran:
+
+cat lower_case_HW_output.txt | comm -12 - words
+
+
