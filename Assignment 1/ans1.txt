@@ -1,0 +1,76 @@
+1. You have two options. If you just want to search the short descriptions of
+each function, you can use man -k *keyword here*. If you want to search the
+whole man page of each function for the keyword, you can use man -K *keyword
+here*.
+
+2. cp: /usr/bin/cp wc: /usr/bin/wc
+
+3. The program names are: X: starts a new server w: shows you everyone who is
+logged on and what they are doing [: Used in condition testing for shell scripts
+
+4. /etc/alternatives/emacs (ls /usr/bin/emacs -l)
+
+5. g+s gives everyone trying to access the file the permission assigned to the
+   group (setgid).  o-x removes execution writes for everyone "others", or users
+   who are not the owner of the file or members of the group.
+
+6. find -mtime -22
+
+7. Directories that have been modified over the last 3 weeks: .  ./Desktop
+./Desktop/desktop.ini ./Desktop/Google Chrome.lnk ./Documents
+./Documents/desktop.ini ./Downloads ./Downloads/desktop.ini ./.cache/abrt
+./.cache/abrt/lastnotification ./.bash_history ./.emacs.d/auto-save-list
+./.emacs.d/auto-save-list/.saves-8189-lnxsrv01.seas.ucla.edu~
+./.emacs.d/auto-save-list/.saves-8187-lnxsrv01.seas.ucla.edu~
+./.emacs.d/auto-save-list/.saves-46967-lnxsrv09.seas.ucla.edu~ ./blah2-new
+./.Xauthority ./CS35L ./CS35L/assignment1 ./CS35L/assignment1/.#ans1.txt
+./CS35L/assignment1/ans1.txt ./CS35L/assignment1/ans1.txt~
+./CS35L/assignment1/#ans1.txt# ./blah1-hard ./blah2-soft ./blah1-new
+./#rats2.cpp#
+
+8. 350 linux-server-5 (my TA said this was OK to use)
+
+9. error.py (path: ./python2.7/site-packages/pyasn1/type/error.py)
+
+10. The locale command gets its data from the settings of the environment
+variables that control the locale. It also takes in implied values, which aren't
+set by the environment. More specifically, locale gets its data from the locale
+definition file.
+
+11. The commands that have sort in their name are: Buffer-menu-sort sort-columns
+    sort-fields sort-lines sort-numeric-fields sort-pages sort-paragraphs
+
+
+12. C-M-a: Takes you to the top of the "defun", or function definition, you're
+    at (runs command beginning-of-defun) C-M-b: Takes you to the beginning of
+    the previous word C-M-c: Ends recursive edit C-M-d: Takes you to first
+    character inside a parenthesis; moves down in parentheses C-M-e: Takes you
+    to the end of "defun", or the function definition C-M-f: Takes you to the
+    next non-alphabetic character C-M-g: Quits whatever process you're doing
+    C-M-h: Selects the whole document (or at least from where the mark was set
+    downwards)
+
+13. The command keyboard-quit is bound to C-g: Signal a `quit' condition.
+    During execution of Lisp code, this character causes a quit directly.  At
+    top-level, as an editor command, this simply beeps.
+
+14. yank is bound to C-y, <S-insertchar>, <S-insert>, <menu-bar> <edit> <paste>:
+
+Reinsert ("paste") the last stretch of killed text.  More precisely, reinsert
+the most recent kill, which is the stretch of killed text most recently killed
+OR yanked.  Put point at the end, and set mark at the beginning without
+activating it.  With just C-u as argument, put point at beginning, and mark at
+end.  With argument N, reinsert the Nth most recent kill.
+
+15. Emacs dired's output differs from ls -li's in the following ways.  1) The
+first lines of output communicate different information, emacs dired's being
+more in-depth.  2) Emacs dired's output has two directories in the beginning
+that are not displayed in ls -l.  emacs dired: total used in directory 350840
+available 11623156 dr-xr-xr-x.  2 root root 81920 Sep 16 13:15 .  drwxr-xr-x.
+16 root root 4096 Dec 5 2016 ..  -rwxr-xr-x 1 root root 41496 Jun 30 2016 [
+-rwxr-xr-x 1 root root 11368 Feb 25 2014 411toppm -rwxr-xr-x 1 root root 107856
+Mar 2 2017 a2p
+
+
+ls -l: total 350752 -rwxr-xr-x 1 root root 41496 Jun 30 2016 [ -rwxr-xr-x 1 root
+root 11368 Feb 25 2014 411toppm -rwxr-xr-x 1 root root 107856 Mar 2 2017 a2p
