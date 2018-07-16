@@ -1,0 +1,83 @@
+Joel George
+004786402
+
+1. To create the file with 10 000 000 single float numbers, I used the command:
+
+cat /dev/urandom | od -t f -N 40000000 | tr " " "\n" | tr -s "\n" |
+sed '1~5d' > output.txt
+
+The first command in the pipe prints to output the file contents of the huge
+dev/random file, and od -t f -N 40000000 does 2 things. Firstly, -t f tells od
+that the output should be printed as single-precision floating point. Secondly,
+-N 40000000 tells od to only accept 40 million bytes of input (because we need
+10 million single-precision float values, and since each single-precision float
+value is 4 bytes, 4 * 10 000 000 = 40 000 000). The next tr command replaces all
+spaces with newlines, and the tr command that follows squeezes all sequences of
+newlines into one, so that each line is just a number that terminates in a
+newline. The final sed command deletes every 5th line, starting at 1, in order
+to remove the addresses from the data list. The original data list, right before
+sed, looked something like this:
+
+0000000
+-1.6343695e-37
+3.6217434e-32
+-7.486364e-06
+1.1524624e-20
+0000020
+-5.1736766e+12
+-3.905759e-37
+6.3104494e-07
+5.659102e-39
+
+0000000 and 0000020 being addresses of the 4 single precision float values. Each
+address shows up every fifth line, so those lines are simply removed from the
+file to isolate the data. Lastly, to check this was indeed 10, 000, 000 words, I
+ran C-x-h on the file output.txt. I then ran M+= to count the number of lines
+and thus numbers in the file. The command output 10 000 000 million lines, and
+since each number gets its own line, there are 10 000 000 numbers in the file.
+
+2. To time the performance of the sort -g command, I ran:
+
+time -p sort -g output_final.txt > /dev/null
+
+The output of this command was:
+
+real 22.62
+user 119.80
+sys 0.70
+
+Running sort -g with 1, 2, and 8 threads:
+
+Command: time -p sort -g --parallel=1 output_final.txt > /dev/null
+
+Output:
+real 114.38
+user 114.05
+sys 0.31
+
+Command: time -p sort -g --parallel=2 output_final.txt > /dev/null
+
+Output:
+real 60.86
+user 115.36
+sys 0.35
+
+Command: time -p sort -g --parallel=4 output_final.txt > /dev/null 
+
+Output:
+real 35.53
+user 118.73
+sys 1.08
+
+Command: time -p sort -g --parallel=8 output_final.txt > /dev/null
+
+Output:
+real 22.19
+user 118.80
+sys 0.81
+
+It is interesting to note that running sort -g with 8 threads was just 0.43
+seconds faster than running it without the parallel command. My guess is that 8
+is the standard number of threads for sort -g when the parallel flag is not
+specified.  
+
