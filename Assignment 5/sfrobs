@@ -1,0 +1,27 @@
+#!/bin/sh
+
+from_string=""
+to_string=""
+for ((i=0; i <=255; i++))
+do
+    x=$i
+    y=$(($i^(42)))
+    x_octal=(`echo "obase=8;$i"|bc`)
+    y_octal=(`echo "obase=8;$y"|bc`)
+    x_final="\\"$x_octal
+    y_final="\\"$y_octal
+    from_string=$from_string$y_final
+    to_string=$to_string$x_final
+done
+
+from_string=$from_string
+to_string=$to_string
+
+if [ $# -eq 0 ]
+then
+    tr $from_string $to_string | sort | tr $to_string $from_string
+elif [ $1 == "-f" ]
+then
+    tr $from_string $to_string | sort -f | tr $to_string $from_string 
+fi
+ 

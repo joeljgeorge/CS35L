@@ -1,0 +1,50 @@
+#!/bin/sh
+
+command=""
+end_command=""
+tr_prefix="tr "
+spaces_arg='|tr  " "  "\n" '
+reverse_spaces_arg='|tr "\n" " "'
+for ((i=0; i <=255; i++))
+do
+    x=$i
+    y=$(($i^(42)))
+    x_octal=(`echo "obase=8;$i"|bc`)
+    y_octal=(`echo "obase=8;$y"|bc`)
+    
+    
+    num_value_y=$y_octal
+    num_value_x=$x_octal
+    first_arg=" \\"$num_value_y
+    reverse_first_arg=" \\"$num_value_x
+    second_arg=0 
+    if [ $i -eq 255 ]
+    then
+	second_arg=" \\"$num_value_x
+	reverse_second_arg=" \\"$num_value_y
+    else
+	second_arg=" \\"$num_value_x" | "
+	reverse_second_arg=" \\"$num_value_y" | "
+    fi
+    command=$command$tr_prefix$first_arg$second_arg
+    end_command=$end_command$tr_prefix$reverse_first_arg$reverse_second_arg
+done
+command=$command$spaces_arg
+
+if [ $# -eq 0 ]
+then
+    sort_cmd=" | sort |"
+    command=`echo $command`$sort_cmd
+    
+elif [ $1 == "-f" ]
+then
+    sort_cmd=" | sort -f |"
+    command=`echo $command`$sort_cmd    
+fi
+
+command=$command$end_command
+command=$command$reverse_spaces_arg
+
+eval $command
+y=`eval $command`
+echo $y

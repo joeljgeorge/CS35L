@@ -1,0 +1,91 @@
+
+Joel George
+004786402
+
+1 & 2. I first wrote tr2b.c, and to write tr2u.c, I replaced every:
+
+char current_char = getchar();
+
+With:
+char current_char;
+int n = read(STDIN_FILENO, &current_char, 1);
+
+To check if I reached the end of the file, I used:
+while(n!=0)
+
+instead of:
+
+while(!feof(stdin))
+
+And I replaced every putchar(current_char) with:
+
+char curr_char = *some value*;
+write(1, &curr_char, 1);
+
+3. To create a file of 5, 000, 000 bytes, I ran the following command:
+
+ head --bytes=5000000 /dev/urandom > intput.txt
+
+This creates a file full of random text that is 5, 000, 000 bytes long.
+To see the number of syscalls executed by each program, when copying in a file
+to terminal, I ran:
+
+strace -o strace_output ./tr2b 'AB' 'XY' < input.txt
+
+This produced a strace file which logs every syscall made by tr2b.
+
+I ran this command for tr2u.c:
+
+strace -o strace_output2 ./tr2u 'AB' 'XY' < input.txt
+
+Just from watching the output of each program, it was clear that tr2u was
+slower. This was proven by the number of syscalls made by tr2u. Just comparing
+every read and write call made by both, it was clear to see that strace_output2
+(tr2u) was MUCH larger than strace_output (tr2b). strace_output2 is 429, 686 KB
+large according to Windows File Explorer, while strace_ouput is a tiny 862
+KB. When I tried to open tr2u on Notepad, Notepad actually crashed, indicating
+how large the tr2u strace file is. In emacs, I highlighted the whole buffer
+using C-x + h, and then ran M-= to get the total number of lines in the file,
+each line being a syscall. tr2b made, according to the method I
+outlined, 8129 syscalls, while tr2u made 9999942 syscalls. 
+
+I then ran :
+
+strace -o strace_output_b ./tr2b 'AB' 'XY' < input.txt > test_b.txt
+strace -o strace_output_u ./tr2u 'AB' 'XY' < input.txt > test_c.txt
+
+In keeping with my expectations, the number of syscalls made by tr2u far
+outweighed those of tr2b, as the file contents displayed. strace_output_u was
+MUCH larger than strace_output_b, with output_u being 171, 075 KB and output_b
+being 140 KB. Using the method documented previously for analyzing syscalls,
+tr2b made 1252 syscalls, while tr2u made 3981358 syscalls. Obviously, these are
+estimated values, but it is clear to see how many more syscalls tr2u made than tr2b.
+
+4. I tried to run time ./tr2u 'AB' 'XY' < input.txt, but because of some PuTTy
+quirk, the display kept outputting PuTTyPuTTyPuTTY after a while, so I used the
+command:
+
+time ./tr2u 'AB' 'XY' < input.txt
+
+to resolve this.
+
+I ran this command and this one:
+
+time ./tr2b 'AB' 'XY' < input.txt
+
+And compared the output:
+
+tr2u:
+real    0m8.652s
+user    0m0.265s
+sys     0m8.308s
+
+tr2b:
+real    0m0.197s
+user    0m0.143s
+sys     0m0.006s
+
+In every category, tr2b beat tr2u, just proving how much overhead comes with
+using syscalls.
+
+

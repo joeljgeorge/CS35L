@@ -1,0 +1,137 @@
+Performance test 1: sfrob vs sfrobu
+
+I used the 5 000 000 byte file that I created for the laboratory part of the
+experiment to test sfrob and sfrobu, and come up with an estimated number of
+comparisons per line. 
+
+Firstly, copied this 5 000 000 byte file into the working directory for sfrob:
+
+cp input.txt ../assignment4/input_sfrob.txt
+
+With a copy of this file in each directory, I opened up two windows of Putty,
+one in the working directory for sfrobu and another in the working directory for
+sfrob. In each respective terminal window, I ran:
+
+time head -100 input.txt | ./sfrobu
+
+And:
+
+time head -100 input_sfrob.txt | ./sfrob
+
+For sfrobu, the output time was:
+
+real    0m0.021s
+user    0m0.003s
+sys     0m0.017s
+
+While the output time for sfrob was:
+real    0m3.724s
+user    0m0.000s
+sys     0m0.002s
+
+I repeated this process, except with an increasing number of lines (head -1000,
+head - 10000, head -100000). This was the respective output:
+
+head -1000
+sfrobu:
+real    0m0.330s
+user    0m0.031s
+sys     0m0.286s
+
+sfrob:
+real    0m0.102s
+user    0m0.026s
+sys     0m0.005s
+
+head -10000
+sfrobu:
+real    0m3.135s
+user    0m0.359s
+sys     0m2.783s
+
+sfrob:
+real    0m0.902s
+user    0m0.287s
+sys     0m0.032s
+
+head -100000
+sfrobu:
+real    0m6.458s
+user    0m0.690s
+sys     0m4.979s
+
+sfrob:
+real    0m1.712s
+user    0m0.618s
+sys     0m0.051s
+
+As is shown time after time again, the sfrob function is way quicker than
+sfrobu, simply because it doesn't use syscalls, which add A LOT of overhead.
+
+Using these data points, I created a quick Excel graph (using the sys time +
+user time, because this is the total amount of CPU time spent). This showed that
+the relationship between time and number of lines was linear, thus implying that
+the general relationship to describe the number of comparison made as a function
+of the number of lines is:
+
+f(n) = xlogx
+
+Where the n is the number of lines. Obviously, this isn't an exact relationship
+between the number of lines and the number of comparisons, but the essence of
+this question is Big O. The Big O the number of comparisons is really determined
+by the qsort function, which implements the QuickSort Algorithm. 
+Knowledge of the QuickSort Algorithm tells me that the average Big O is
+n(log(n)), and this is validated by the Excel graph. This relationship is much
+easier to see in sfrobu than sfrob, simply because the overhead exaggerates the
+effect.
+
+Performance Test 2: All the sfrob's
+Now, as a last final comparison between all the sfrob versions, I ran:
+
+time head -1000000 input.txt | ./sfrob
+time head -1000000 input.txt | ./sfrobu
+time head -1000000 input.txt | ./sfrobs
+time head -1000000 input.txt | ./sfrobu -f 
+time head -1000000 input.txt | ./sfrobs -f
+
+These were the resulting outputs (in the same order as the above list):
+
+sfrob:
+real    0m1.682s
+user    0m0.617s
+sys     0m0.046s
+
+sfrobu:
+real    0m3.789s
+user    0m0.688s
+sys     0m3.115s
+
+sfrobs:
+real    0m6.253s
+user    0m2.749s
+sys     0m0.303s
+
+
+sfrobu -f:
+real    0m3.760s
+user    0m0.710s
+sys     0m3.042s
+
+sfrobs -f:
+real    0m5.575s
+user    0m2.751s
+sys     0m0.156s
+
+To rank these in terms of speed (user + sys), we have:
+1.sfrob
+2.sfrobs -f
+3.sfrobs
+4. sfrobu -f
+5. sfrobu
+
+It makes sense why sfrob was the fastest; it had no overhead from the direct
+system calls made by sfrobu. It also makes sense why the -f sorts were faster
+than their normal counterparts; when you sort case-insensitively, you don't have
+to worry about comparing cases, so that's one less comparison to make. Lastly,
+it makes sense why sfrobu was last. It's because with the number of syscalls
+made, the overhead was huge and the program became really slow.
