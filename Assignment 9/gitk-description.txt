@@ -1,0 +1,9 @@
+The upper left hand subwindow shows a tree of commits, with the newest on top and the oldest at the bottom. This tree contains a history of previous commits, with brief descriptions of those commits, merges, and branches that were done in the past.
+
+The upper middle subwindow simply shows the name of the person who is responsible for the action displayed in the upper left hand pane. The upper right subwindow shows the timestamp of the person's action.
+
+The bottom left subwindow shows a type of ChangeLog that documents the author, committer, parent, child, branches, etc. of the current action being analyzed. It also shows the diff of the action that was comitted. (if relevant for that action).
+
+The bottom right subwindow has two options: Patch and Tree. Tree shows the file path/structure of the tree at the time of the action that was just clicked. Patch shows the files affected by the patch. 
+
+The sliver of a window between the top windows and bottom windows simply shows the SHA1 ID of the current action you're looking at, and it offers a search window that can help you locate commits.

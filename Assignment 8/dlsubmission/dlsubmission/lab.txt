@@ -1,0 +1,272 @@
+Joel George 
+004786402
+
+1. I used emacs to create my file called trivial.c. That file simple contained the
+following code:
+
+#include <stdio.h>
+#include <math.h>
+
+int main(){
+  double x = cos(sqrt(3.0));
+  printf("%.17g", x);
+  return 0;
+}
+
+I then compiled trivial using:
+gcc trivial.c -o trivial
+
+2. Then I ran ldd trivial.c and got the following output:
+
+   linux-vdso.so.1 =>  (0x00007ffd88fc4000)
+   libc.so.6 => /lib64/libc.so.6 (0x00007f6d08ad2000)
+   /lib64/ld-linux-x86-64.so.2 (0x000055d2a2088000)
+
+3. I then ran strace ./trivial, and got the following output:
+
+execve("./trivial", ["./trivial"], [/* 37 vars */]) = 0
+brk(NULL)                               = 0x2426000
+mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) =
+0x7fc672aa3000
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=161768, ...}) = 0
+mmap(NULL, 161768, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7fc672a7b000
+close(3)                                = 0
+open("/lib64/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\20\35\2\0\0\0\0\0"...,
+832) = 832
+fstat(3, {st_mode=S_IFREG|0755, st_size=2127336, ...}) = 0
+mmap(NULL, 3940800, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) =
+0x7fc6724c0000
+mprotect(0x7fc672678000, 2097152, PROT_NONE) = 0
+mmap(0x7fc672878000, 24576, PROT_READ|PROT_WRITE,
+MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b8000) = 0x7fc672878000
+mmap(0x7fc67287e000, 16832, PROT_READ|PROT_WRITE,
+MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7fc67287e000
+close(3)                                = 0
+mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) =
+0x7fc672a7a000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) =
+0x7fc672a78000
+arch_prctl(ARCH_SET_FS, 0x7fc672a78740) = 0
+mprotect(0x7fc672878000, 16384, PROT_READ) = 0
+mprotect(0x600000, 4096, PROT_READ)     = 0
+mprotect(0x7fc672aa4000, 4096, PROT_READ) = 0
+munmap(0x7fc672a7b000, 161768)          = 0
+fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 32), ...}) = 0
+mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) =
+0x7fc672aa2000
+write(1, "-0.16055653857469052", 20-0.16055653857469052)    = 20
+exit_group(0)                           = ?
++++ exited with 0 +++
+
+You can tell which commands are associated with dynamic linking just by
+inspection (they have to do with loading dynamic libraries, which have a file
+ending of .so). However, just so I didn't miss any functions, I tried compiled
+trivial.c statically (gcc -static trivial.c -o trivial-static) and ran strace on
+the statically compiled program. However, static version of stdio.h and math.h
+did not seem to exist (locate stdio.a and locate math.a output
+nothing). Therfore, I had to stick with inspection.
+
+The syscall related to dynamic linking are:
+
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+
+open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+
+open("/lib64/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+
+The others may be related in some way, but these are the only ones that display
+an obvious relationship with dynamic linking. The other ones require a bit of
+intuition; knowing that dynamic linkers link by opening files and mapping
+between source files and the invoked libraries, we see that any of the functions
+that are related to opening shared libraries and accessing them are also related
+to the dynamic linking process. 
+
+Therefore:
+
+Functions that call the dynamic linker:
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=147187, ...}) = 0
+mmap(NULL, 147187, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7f449c5a8000
+close(3)                                = 0
+
+Functions involved in loading libraries:
+open("/lib64/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0 \34\2\0\0\0\0\0"...,
+832) = 832
+fstat(3, {st_mode=S_IFREG|0755, st_size=2112384, ...}) = 0
+mmap(NULL, 3936832, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) =
+0x7f449bfea000
+mprotect(0x7f449c1a1000, 2097152, PROT_NONE) = 0
+mmap(0x7f449c3a1000, 24576, PROT_READ|PROT_WRITE,
+MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b7000) = 0x7f449c3a1000
+mmap(0x7f449c3a7000, 16960, PROT_READ|PROT_WRITE,
+MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7f449c3a7000
+close(3)   
+
+
+4. I wasn't sure if the professor wanted us to run the command "ls /usr/bin |
+awk 'NR%101==nnnnnnnnn%101'" with our own UID in place of nnn..., but I just ran it
+with nnn... because it output some values. Running this command output:
+
+arch
+ccache-swig
+cp
+dbiproxy
+dwz
+fixcvsdiff
+gio
+grub2-render-label
+head
+inputattach
+kcmshell4
+kstartupconfig4
+logresolve
+mkfontscale
+nf-ct-add
+oo2xliff
+pamsistoaglyph
+pbmtoplot
+pilconvert.pyc
+pnminvert
+ppmdcfont
+ptardiff
+rhn_register
+scorep-score
+sopranocmd
+tailf
+uic3
+wordlist2hunspell
+xsetroot
+
+Running ldd on each command, most of them output something like this:
+
+ldd /usr/bin/arch
+
+    linux-vdso.so.1 =>  (0x00007fff493f5000)
+    libc.so.6 => /lib64/libc.so.6 (0x00007f066bcfb000)
+    /lib64/ld-linux-x86-64.so.2 (0x000055ff92403000)
+
+The outputs were all some kind of variation of this, either longer or shorter.
+
+There were also some that output an error ("not a dynamic executable"). This
+is because those commands were compiled statically, and did not rely on
+dynamically linked libraries. Those commands were:
+
+dbiproxy
+fixcvsdiff
+oo2xliff
+pilconvert.pyc (we didn't have permission to execute this one, so maybe that's
+why we received an error here)
+ptardiff
+wortdlist2hunspell
+
+To create the sorted list, I ran all the ldd commands that did not output an
+error again, except this time
+piping their output into a text file called lib_list. My commands looked like "ldd
+/usr/bin/*insert command here* >> lib_list.txt". Once this was done, I ran "sed
+'s/\=>.*//' lib_list.txt > lib_refined.txt" to remove all of the extra
+information that ldd provides that is not the actual library name. Once I
+removed that, I ran "sort -u lib_refined.txt" to a) remove all duplicates from
+the file and b) sort the file. I then opened up the file and manually removed
+all memory addresses from the list. This is the final list:
+        /lib64/ld-linux-x86-64.so.2
+        libacl.so.1
+        libapr-1.so.0
+        libaprutil-1.so.0
+        libattica.so.0.4
+        libattr.so.1
+        libblkid.so.1
+        libbz2.so.1
+        libcap.so.2
+        libclucene-core.so.1
+        libclucene-shared.so.1
+        libcom_err.so.2
+        libcrypto.so.10
+        libcrypt.so.1
+        libc.so.6
+        libcube4.so.7
+        libdb-5.3.so
+        libdbus-1.so.3
+        libdbusmenu-qt.so.2
+        libdevmapper.so.1.02
+        libdl.so.2
+        libdw.so.1
+        libelf.so.1
+        libexpat.so.1
+        libfam.so.0
+        libffi.so.6
+        libfontconfig.so.1
+        libfontenc.so.1
+        libfreebl3.so
+        libfreetype.so.6
+        libgcc_s.so.1
+        libgio-2.0.so.0
+        libglib-2.0.so.0
+        libgmodule-2.0.so.0
+        libgobject-2.0.so.0
+        libgssapi_krb5.so.2
+        libgthread-2.0.so.0
+        libICE.so.6
+        libk5crypto.so.3
+        libkcmutils.so.4
+        libkdecore.so.5
+        libkdefakes.so.5
+        libkdeinit4_kcmshell4.so
+        libkdeui.so.5
+        libkeyutils.so.1
+        libkrb5.so.3
+        libkrb5support.so.0
+        liblzma.so.5
+        libmount.so.1
+        libm.so.6
+        libnetpbm.so.11
+        libnl-3.so.200
+        libnl-cli-3.so.200
+        libnl-genl-3.so.200
+        libnl-idiag-3.so.200
+        libnl-nf-3.so.200
+        libnl-route-3.so.200
+        libpcre.so.1
+        libpng15.so.15
+        libpthread.so.0
+        libqca.so.2
+        libQt3Support.so.4
+        libQtCore.so.4
+        libQtDBus.so.4
+        libQtGui.so.4
+        libQtNetwork.so.4
+        libQtSql.so.4
+        libQtSvg.so.4
+        libQtXml.so.4
+        libresolv.so.2
+        librt.so.1
+        libselinux.so.1
+        libsepol.so.1
+        libSM.so.6
+        libsopranoclient.so.1
+        libsopranoindex.so.1
+        libsoprano.so.4
+        libssl.so.10
+        libstdc++.so.6
+        libudev.so.1
+        libuuid.so.1
+        libX11.so.6
+        libXau.so.6
+        libxcb.so.1
+        libXcursor.so.1
+        libXext.so.6
+        libXfixes.so.3
+        libXft.so.2
+        libXinerama.so.1
+        libXi.so.6
+        libXmuu.so.1
+        libXpm.so.4
+        libXrandr.so.2
+        libXrender.so.1
+        libXtst.so.6
+        libz.so.1
+        linux-vdso.so.1

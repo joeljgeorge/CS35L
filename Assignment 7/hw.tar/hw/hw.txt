@@ -1,0 +1,39 @@
+Joel George
+004786402
+
+1. If a message is being sent from one person to another over a network, and
+every byte being sent is monitored, the network is still secure, because the
+only way for the generated message digest and encrypted message digest (digital
+signature) to match up is the public key of the sender is the public key in the
+key-pair of the original sender. 
+
+However, if the keystrokes are being monitored, then the passphrase used to
+generate the public and private keys can be found out. Then, the message can be
+ successfully altered undetected, as the attacker can use that passphrase to
+generate the exact same public and private keys as the original sender. With
+access to the original sender's public and private keys, they can send an
+encrypted message digest that, when decoded with the original sender's public
+key, matches the generated message digest exactly. 
+
+ Since the other team did indeed have physical control of the USB, they could've
+ changed the message before it was sent, so even though the original sender is
+ indeed sending the message, it is not the message he intended to send, but
+ rather the altered message, created by the attacking team. The reason this kind
+ of attack works is because it interferes with the message before the encryption
+ process - this points towards the success of the digital signature system, in
+ that attackers can only successfully alter messages if they get their hands on
+ the physical message before it is sent. While the message is in motion, it
+ cannot be altered. Additionally, if you are booting off of a USB, that can
+ load keylogging software onto your computer. Most importantly, the attackers
+ can control the root of the software from which you are booting up, which means
+ that they would have unrestricted control to all the ssh folders created, which
+ store the public and private keys of the sender. As explained before, with that
+ information, they can send altered messages that are undetectable by the
+ receiver. 
+
+2. gpg --verify simply checks whether the file received is the original file
+sent, not whether or not you are the actual creator of the file. To check if you
+are the creator of the file, verify should check the public key of the person
+running the command against the public key of the sender, which should be stored
+as metadata in the file.
+

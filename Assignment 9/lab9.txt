@@ -1,0 +1,365 @@
+Joel George
+004786402
+
+1. I first created a directory in my CS35L folder using:
+
+mkdir assignment9
+
+Then, using the commands on the Savannah repository website, downloaded a copy
+of the Diffutils repo using:
+
+git clone https://git.savannah.gnu.org/git/diffutils.git
+
+2. To get a log of changes to Diffutil's master branch, I used:
+
+cd diffutils
+git log > git-log.txt
+
+3. To generate a list of tags used for Diffutils, I used:
+
+git tag > git-tags.txt
+
+Once I was in the diffutils folder.
+
+4. Since git-log.txt is a log of changes to the master branch, I opened
+git-log.txt with emacs and then used C-s 'maint: quote 'like this' or "like
+this", not `like this'' to find the commit that I was searching for. I then
+copied the commit number, and then used this to store the specific commit into a
+patch file:
+
+git show 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f > quote-patch.txt
+
+5. To check out version 3.0, I used:
+
+git checkout v3.0 -b my_branch
+
+The output I got was: Switched to a new branch 'my_branch'
+
+6. To patch version 3, I ran the following command: 
+
+patch -p1 < quote-patch.txt
+
+There were a couple files that the patch command couldn't find, but I skipped
+over these as instructed. The final output regarding successful or failed hunks
+was:
+
+patching file ms/config.bat
+patching file ms/config.site
+Hunk #1 succeeded at 73 with fuzz 1.
+patching file po/en.po
+patching file src/analyze.c
+patching file src/cmp.c
+Hunk #1 succeeded at 36 with fuzz 1.
+Hunk #4 succeeded at 185 (offset -6 lines).
+Hunk #5 succeeded at 231 (offset -6 lines).
+Hunk #6 succeeded at 257 (offset -6 lines).
+Hunk #7 succeeded at 269 (offset -6 lines).
+Hunk #8 succeeded at 364 (offset -6 lines).
+Hunk #9 succeeded at 377 (offset -6 lines).
+patching file src/context.c
+Hunk #1 succeeded at 159 (offset 1 line).
+Hunk #2 succeeded at 289 (offset 1 line).
+Hunk #3 succeeded at 393 with fuzz 2 (offset 1 line).
+Hunk #4 succeeded at 431 (offset 1 line).
+Hunk #5 succeeded at 459 (offset 1 line).
+patching file src/diff.c
+Hunk #1 succeeded at 40 with fuzz 2 (offset -2 lines).
+Hunk #2 succeeded at 57 (offset -2 lines).
+Hunk #3 succeeded at 92 (offset -2 lines).
+Hunk #4 succeeded at 330 (offset -10 lines).
+Hunk #5 succeeded at 505 (offset -10 lines).
+Hunk #6 succeeded at 534 (offset -10 lines).
+Hunk #7 succeeded at 585 (offset -14 lines).
+Hunk #8 succeeded at 744 (offset -14 lines).
+Hunk #9 succeeded at 826 (offset -14 lines).
+Hunk #10 FAILED at 876.
+Hunk #11 FAILED at 906.
+Hunk #12 FAILED at 942.
+Hunk #13 succeeded at 960 with fuzz 2 (offset -29 lines).
+Hunk #14 succeeded at 1159 with fuzz 2 (offset -32 lines).
+3 out of 14 hunks FAILED -- saving rejects to file src/diff.c.rej
+patching file src/diff.h
+Hunk #2 succeeded at 126 with fuzz 2 (offset -13 lines).
+Hunk #3 succeeded at 202 (offset -13 lines).
+patching file src/diff3.c
+Hunk #1 succeeded at 35 (offset 1 line).
+Hunk #2 succeeded at 159 (offset 1 line).
+Hunk #3 succeeded at 316 (offset 1 line).
+Hunk #4 succeeded at 351 (offset 1 line).
+Hunk #5 succeeded at 412 (offset 1 line).
+Hunk #6 FAILED at 433.
+Hunk #7 succeeded at 460 with fuzz 2 (offset -18 lines).
+Hunk #8 succeeded at 1275 (offset -18 lines).
+Hunk #9 succeeded at 1475 (offset -18 lines).
+1 out of 9 hunks FAILED -- saving rejects to file src/diff3.c.rej
+patching file src/dir.c
+Hunk #1 succeeded at 84 (offset -1 lines).
+Hunk #2 succeeded at 125 (offset -1 lines).
+Hunk #3 succeeded at 154 (offset -1 lines).
+Hunk #4 succeeded at 234 (offset -1 lines).
+patching file src/ifdef.c
+patching file src/io.c
+patching file src/sdiff.c
+Hunk #2 succeeded at 92 (offset 1 line).
+Hunk #3 succeeded at 175 (offset 23 lines).
+Hunk #4 succeeded at 230 (offset 17 lines).
+Hunk #5 succeeded at 286 (offset 17 lines).
+Hunk #6 succeeded at 572 (offset 13 lines).
+Hunk #7 succeeded at 747 (offset 41 lines).
+patching file src/side.c
+patching file src/system.h
+Hunk #2 succeeded at 105 (offset 6 lines).
+patching file src/util.c
+Hunk #4 succeeded at 190 with fuzz 2.
+Hunk #8 succeeded at 650 (offset -27 lines).
+patching file tests/help-version
+Hunk #1 succeeded at 75 (offset 1 line).
+Hunk #2 succeeded at 85 (offset 1 line).
+Hunk #3 succeeded at 96 (offset 1 line).
+Hunk #4 succeeded at 108 (offset 1 line).
+Hunk #5 succeeded at 140 (offset 1 line).
+Hunk #6 succeeded at 188 (offset 1 line).
+
+As is shown above, some of the hunks failed. 
+
+7. Using the command:
+
+git status
+
+I got a list of files that were sorted into files that were modified and files
+that were untracked in my branch. This was the output I received:
+
+# On branch this_branch
+# Changes not staged for commit:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#       modified:   NEWS
+#       modified:   README
+#       modified:   TODO
+#       modified:   doc/diagmeet.note
+#       modified:   ms/config.bat
+#       modified:   ms/config.site
+#       modified:   po/en.po
+#       modified:   src/analyze.c
+#       modified:   src/cmp.c
+#       modified:   src/context.c
+#       modified:   src/diff.c
+#       modified:   src/diff.h
+#       modified:   src/diff3.c
+#       modified:   src/dir.c
+#       modified:   src/ifdef.c
+#       modified:   src/io.c
+#       modified:   src/sdiff.c
+#       modified:   src/side.c
+#       modified:   src/system.h
+#       modified:   src/util.c
+#       modified:   tests/help-version
+#
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+#       NEWS.oqfmSqP
+#       NEWS.orig
+#       README-hacking.orig
+#       README-hacking.rej
+#       README.o2RAQ9o
+#       README.orig
+#       README.rej
+#       TODO.okJlYZU
+#       cfg.mk.orig
+#       cfg.mk.rej
+#       doc/diagmeet.note.ouLTXZX
+#       git-log.txt
+#       git-tags.txt
+#       ms/config.site.orig
+#       quote-patch.txt
+#       quote-patch.txt.rej
+#       src/cmp.c.orig
+#       src/context.c.orig
+#       src/diff.c.orig
+#       src/diff.c.rej
+#       src/diff.h.orig
+#       src/diff3.c.orig
+#       src/diff3.c.rej
+#       src/dir.c.orig
+#       src/sdiff.c.orig
+#       src/system.h.orig
+#       src/util.c.orig
+#       tests/help-version.orig
+
+The files marked modified were the ones involved with the patch.
+
+9. To undo changes in non-.c files, I opened them up in emacs in another
+terminal window and simply used the vc-revert command (C-x v u). This would open
+up a small prompt window, into which I'd enter 'yes', hit return, then move to
+the enxt file.
+
+I applied the vc-diff function (C-x v = ) for .c files. I would only undo hunks
+in which there were comments or lines of text; hunks with altered C-strings in
+lines of code were not undone.
+
+10. 
+I ran cd src, and then opened up the two .c.rej files (diff.c.rej and
+diff3.c.rej) and opened up the corresponding c files in another terminal
+windows. I deleted the old sections and copied the new sections from the .c.rej
+files into the old .c files. The three files that were altered were diff.c and
+diff3.c and sdiff.c.
+11. I ran git status and got these files as untracked:
+
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+#       .#git-log.txt
+#       NEWS.orig
+#       README-hacking.orig
+#       README-hacking.rej
+#       README.orig
+#       README.rej
+#       cfg.mk.orig
+#       cfg.mk.rej
+#       git-log.txt
+#       git-tags.txt
+#       ms/config.site.orig
+#       quote-patch.txt
+#       src/cmp.c.orig
+#       src/context.c.orig
+#       src/diff.c.orig
+#       src/diff.c.rej
+#       src/diff.h.orig
+#       src/diff3.c.orig
+#       src/diff3.c.rej
+#       src/dir.c.orig
+#       src/sdiff.c.orig
+#       src/system.h.orig
+#       src/util.c.orig
+#       tests/help-version.orig
+
+To delete all of the untracked files, I ran:
+
+git clean -n
+
+This produced a list of untracked files:
+Would remove #context.c#
+Would remove #diff.c#
+Would remove cmp.c.oJzzGwP
+Would remove cmp.c.oaFPpTD
+Would remove cmp.c.orig
+Would remove cmp.c.rej
+Would remove diff.c.ol0opGx
+Would remove diff.c.orig
+Would remove diff.c.rej
+Would remove diff3.c.o6b07T4
+Would remove diff3.c.orig
+Would remove diff3.c.rej
+Would remove dir.c.orig
+Would remove dir.c.rej
+Would remove sdiff.c.orig
+Would remove sdiff.c.rej
+Would remove util.c.orig
+Would remove util.c.rej
+
+And then ran:
+
+git clean -f
+
+I got the output that all the files that were listed above were removed. Howver,
+this deleted git-log.txt and git-tag.txt, so I redid the commands for those to
+bring those files back.
+
+ 
+12. When I ran git status again, I received:
+
+# On branch my_branch
+# Changes not staged for commit:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#       modified:   src/cmp.c
+#       modified:   src/diff.c
+#       modified:   src/diff3.c
+#       modified:   src/dir.c
+#       modified:   src/sdiff.c
+#       modified:   src/util.c
+#       modified:   tests/help-version
+#
+no changes added to commit (use "git add" and/or "git commit -a")
+
+I then ran:
+
+git diff > quote-3.0-patch.txt
+
+I then ran:
+
+wc -l < quote-3.0-patch.txt
+
+To see how many lines were in the file. The output I got was 349, which
+was within the 300 to 400 line range outlined by the spec.
+
+13. Because I was running on lnsrv09, I ran the commands outlined in the
+README-hacking, but also added the additional patch after running
+./bootstrap. The way I did this was by copying the text in the patch into a file
+called additional_patch.txt, and then running patch -p1 <
+additional_patch.txt. However, whenever I tried running ./bootstrap, I got an
+Error: 'help2man' not found. To fix this, I first ran:
+
+export PATH=/usr/local/cs/bin:$PATH 
+
+And then ran my commands as per the README-hacking:
+
+./boostrap
+patch -p1 < additional_patch.txt
+
+patch -p1 < additional_patch.txt gave me an error:
+can't find file to patch at input line 3
+Perhaps you used the wrong -p or --strip option?
+The text leading up to this was:
+--------------------------
+|--- old/stdio.in.h     2016-01-25 16:53:50.846901000 -0800
+|+++ lib/stdio.in.h     2016-01-25 16:55:28.997468000 -0800
+--------------------------
+File to patch:
+Skip this patch? [y]
+Skipping patch.
+
+Therefore, I changed the -p1 flag to
+-p0 and it worked. The reason there was an error is because the patch was
+ignoring the directory specified by the 1 slash, and so removing this
+restriction allowed the patch to succeed.
+
+The next commands I ran was:
+./configure
+make
+make check
+
+This actually output an error, so instead of using the patch method, I ran
+./bootstrap on lnxsrv09, and then ./configure on lnxsrv03. Then I ran make and
+make check on that same lnxsrv03 server, and I got no error. Make check did not
+seem to be working properly, so I manually tested the diff command by testing
+diff . -. This output:
+diff: cannot compare '-' to a directory
+
+Correctly using '-' instead of `-'. I also ran diff --help, which output:
+One of the lines used to be:
+ -l  --paginate  Pass the output through `pr' to paginate it.
+But is now:
+ -l  --paginate  Pass the output through 'pr' to paginate it. 
+Again, correctly using the regular apostrophe instead of the grave accent.
+
+14. To run the sanity check, I first copied diffutils into two folders:
+cp -r diffutils diffutils-3.0
+cp -r diffutils diffutils-3.0-patch
+
+I then cd'd into diffutils-3.0, and set it to the older version of diffutils by
+using git checkout v3.0. I then ran in the root folder (assignment9):
+
+diffutils-3.0-patch/src/diff -pru diffutils-3.0 diffutils-3.0-patch
+> quote-3.0-test.txt.
+
+15. To test the difference between quote-3.0-test.txt and quote-3.0-patch.txt, I 
+ran:
+
+ diff quote-3.0-test.txt diffutils-3.0-patch/quote-3.0-patch.txt
+
+This output many differences between the two files. The two files have major 
+differences, and these differences are certainly not innocuous.

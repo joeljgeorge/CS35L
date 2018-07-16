@@ -1,0 +1,68 @@
+Joel George
+004786402
+
+First I plugged in the Beaglebone, and navigated to the external storage drive
+in File Explorer. I then clicked on START.htm, and then downloaded the 64 bit
+installer. However, whenever I tried to run the installer, it always failed. I
+found that this is because the installer is not compatible with Windows 10, so I
+used the link that another student linked to:
+https://github.com/beagleboard/beaglebone-getting-started/blob/master/Drivers/Windows/BONE_D64.exe. This
+downloaded all the necessary drivers.
+
+Setting up Beaglebone
+I opened up Putty, and set the Host Name to 192.168.7.2. I then hit Open. 
+
+I logged in as root, and left the password blank.
+
+To connect to wifi, I ran sudo connmanctl:
+
+Within connmanctl, I ran:
+enable wifi
+scan wifi
+services
+agent on
+connect (wifi address for UCLA_WEB_RES) 
+quit
+
+Having connected to UCLA_WEB_RES, I ran:
+sudo apt-get update
+sudo apt-get install xauth
+apt-get install firefox-esr-l10n-en-gb
+
+I also installed XMing on my local machine.
+
+Client:
+I opened Putty, opened the SSH tab, and then navigated to X11. I then clicked
+'Enable X11 Forwarding', and set the Putty 'Host Name' to 192.168.7.2. I set up
+all the connmanctl wifi stuff again, except this time connecting to
+UCLA_WIFI_RES. To connect to WIFI_RES, I connected using connmanctl and then
+ran:
+firefox 
+
+In firefox, I ran 1.1.1.1 to pull up the login authentication screen, and I
+logged into UCLA_WIFI_RES. From there, I ran:
+
+ssh-keygen
+ssh-copy-id -i joel1@164.67.84.32 (joel1 was my username on the server,
+164.67.84.32) 
+
+To then ssh into the server:
+ssh joel1@164.67.84.32
+ssh -X joel1@164.67.84.32
+
+Once in, I ran firefox again, and firefox ran in Xming.
+
+Setting up the server:
+I ran ssh-keygen to generate public and private keys.
+
+I then ran the following commands:
+
+sudo useradd -d /home/nikhil -m nikswam to create an account for the client
+
+sudo passwd nikswam to set a passwd for this user
+
+cd /home/nikswam and sudo mkdir .ssh to create an .ssh directory for this user
+
+sudo chown -R nikswam .ssh and sudo chmod 700 .ssh to change permissions for user
+
+Client was able to login and firefox successfully opened after he logged in to my server

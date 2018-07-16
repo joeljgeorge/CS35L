@@ -1,0 +1,141 @@
+Joel George
+004786402
+
+1. I used:
+
+emacs hw9.txt 
+
+to create a file to log my actions for the hw section of this lab.
+
+2. To checkout version 3.0 of Diffutils from my repo into a new branch named
+"quote", I ran:
+
+cd diffutils
+git checkout v3.0 -b quote
+
+3. I realized that this patch must not include any extraneous files, so I moved
+git-log.txt, git-tag.txt, quote-patch.txt, and quote-3.0-patch.txt into the root directory:
+
+mv *filename* ../*filename*
+
+To install my change into this new branch, I ran the patch command:
+
+patch -p1 < ../quote-3.0-patch.txt
+
+I got the output:
+patching file src/cmp.c
+patching file src/diff.c
+patching file src/diff3.c
+patching file src/dir.c
+patching file src/sdiff.c
+patching file src/util.c
+patching file tests/help-version
+
+
+5. I opened emacs by running the following command:
+
+emacs 
+
+And then used the "add-change-log-entry-other-window" command (C-x 4 a) to
+create the ChangeLog entry for my patch:
+
+        * src/cmp.c: Grave accents were replaced with standard apostrophe.
+        * src/diff.c: Grave accents were replaced with standard apostrophe
+                      (also in string literal).
+        * src/diff3.c: Grave accents were replaced with standard apostrophe
+                      (also in string literal).
+        * src/dir.c: Grave accents were replaced with standard apostrophe.
+        * src/sdiff.c: Grave accents were replaced with standard apostrophe.
+        * src/util.c: Grave accents were replaced with standard apostrophe.
+6. To add the files to the commit, I used:
+
+git add .
+
+To actually push this commit, I ran:
+
+git commit -F ChangeLog
+
+I then confirmed that this commit was pushed with:
+
+git log
+
+which output:
+commit 93eea51ad9ca986dc2aeda1ba3ff0e7c36d00723
+Author: Joel John George <george@lnxsrv09.seas.ucla.edu>
+Date:   Sun Dec 10 20:19:46 2017 -0800
+
+    2017-12-10  Joel John George  <george@lnxsrv09.seas.ucla.edu>
+
+        * src/cmp.c: Grave accents were replaced with standard apostrophe.
+        * src/diff.c: Grave accents were replaced with standard apostrophe
+                      (also in string literal).
+        * src/diff3.c: Grave accents were replaced with standard apostrophe
+                      (also in string literal).
+        * src/dir.c: Grave accents were replaced with standard apostrophe.
+        * src/sdiff.c: Grave accents were replaced with standard apostrophe.
+        * src/util.c: Grave accents were replaced with standard apostrophe.
+
+commit 022cd5c5eb647a22a4daa5fe5cbc10af6d5a1112
+Author: Jim Meyering <meyering@redhat.com>
+Date:   Mon May 3 18:49:55 2010 +0200
+
+    version 3.0
+:
+
+Since my commit was included in the commit history log, I was reassured that it
+went through. 
+
+7.I then generated the formatted-patch.txt by using this command:
+
+git format-patch -1 --stdout HEAD > formatted-patch.txt
+
+The -1 tells the command to only use the last commit, which is my commit.
+
+8. I used Ashwin Dharne's patch. I first ran:
+
+git checkout v3.0 -b partner
+
+to create the temporary partner branch. I then ran:
+
+git am < ../ashwin_formatted-patch.txt
+
+This was the output:
+
+Applying: 2017-12-10 Joel John George <george@lnxsrv09.seas.ucla.edu>
+
+8. I then ran:
+
+./bootstrap (linux server 09)
+./configure (linux server 03)
+make (linux server 03)
+
+I had to run export PATH=/usr/local/cs/bin:$PATH again before running
+./bootstrap and make.
+
+I then ran diff - ., which output:
+
+diff: cannot compare '-' to a directory
+
+Running diff --help also output the correctly modified quotations for example:
+
+-l, --paginate                pass output through 'pr' to paginate it
+
+9. I then ran:
+
+make distdir
+
+This output a lot of verbose text. Once this was completed, I ran:
+
+emacs diffutils*/ChangeLog
+
+The emacs file that was opened contained my ChangeLog entry!
+
+9. For this last command, I had to open up a new terminal session with the X11
+Forwarding enabled. When I navigated to ~eggert/src/gnu/emacs and ran gitk, I
+got the error gitk: command not found. To fix this, I used:
+
+export PATH=/usr/local/cs/bin:$PATH
+
+And then ran gitk. I've attached a screenshot of the graphical user
+interface. The newest merge that is not newer than 2015-01-25 was titled,
+"Improved glitch fix", and was submitted by Joakim Verona. 
